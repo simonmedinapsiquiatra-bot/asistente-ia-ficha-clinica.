@@ -215,7 +215,7 @@ La paciente presenta un cuadro compatible con un Trastorno Afectivo Bipolar y se
   }
 ];
 
-export const BIBLIOGRAFIA_INTERNA = \`
+export const BIBLIOGRAFIA_INTERNA = `
 Este documento actúa como referencia interna de terminología, conceptos y abreviaturas obligatorias para estandarizar la ficha clínica.
 
 ## 1. Abreviaturas de Antecedentes y Evaluación General
