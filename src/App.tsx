@@ -23,6 +23,9 @@ export default function App() {
   const [result, setResult] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  
+  const [extraInstructions, setExtraInstructions] = useState("");
+  const [showExtraInstructions, setShowExtraInstructions] = useState(false);
 
   // Settings State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -132,6 +135,10 @@ export default function App() {
         "Apuntes": apuntes,
         "Bibliografía": BIBLIOGRAFIA_INTERNA
     };
+
+    if (extraInstructions.trim()) {
+      contents += `\nINSTRUCCIONES ADICIONALES DEL USUARIO:\n${extraInstructions}\n`;
+    }
 
     for (const [key, value] of Object.entries(inputs)) {
       if (value) {
@@ -331,30 +338,50 @@ export default function App() {
         <div className="lg:col-span-7 flex flex-col h-[calc(100vh-8rem)] sticky top-24">
           <div className="bg-white flex-1 rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
             
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <h2 className="text-lg font-semibold text-slate-800">Generated Output</h2>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleCopy}
-                  disabled={!result || generating}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 text-sm font-medium rounded-lg shadow-sm transition-colors"
-                  title="Copiar resultado"
-                >
-                  {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-                  {copied ? "Copiado!" : "Copiar"}
-                </button>
-                <button
-                  onClick={handleGenerate}
-                  disabled={generating}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
-                >
-                  {generating ? (
-                    <><Loader2 className="animate-spin" size={16} /> Generando...</>
-                  ) : (
-                    <><Send size={16} /> Generar</>
-                  )}
-                </button>
+            <div className="px-6 py-4 border-b border-slate-100 flex flex-col gap-3 bg-slate-50/50">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-800">Generated Output</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowExtraInstructions(!showExtraInstructions)}
+                    className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg shadow-sm transition-colors"
+                    title="Instrucciones Adicionales"
+                  >
+                    <span className="text-lg leading-none">+</span> Instrucciones
+                  </button>
+                  <button
+                    onClick={handleCopy}
+                    disabled={!result || generating}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 text-sm font-medium rounded-lg shadow-sm transition-colors"
+                    title="Copiar resultado"
+                  >
+                    {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                    {copied ? "Copiado!" : "Copiar"}
+                  </button>
+                  <button
+                    onClick={handleGenerate}
+                    disabled={generating}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
+                  >
+                    {generating ? (
+                      <><Loader2 className="animate-spin" size={16} /> Generando...</>
+                    ) : (
+                      <><Send size={16} /> Generar</>
+                    )}
+                  </button>
+                </div>
               </div>
+
+              {showExtraInstructions && (
+                <div className="pt-2 animate-in slide-in-from-top-2 fade-in duration-200">
+                  <textarea
+                    className="w-full h-20 p-3 text-sm bg-white border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y text-slate-800 shadow-inner"
+                    placeholder="Agrega instrucciones extra para la IA. Por ejemplo: 'Hazlo más resumido', 'Usa un tono más empático', 'Asegúrate de destacar X síntoma'..."
+                    value={extraInstructions}
+                    onChange={(e) => setExtraInstructions(e.target.value)}
+                  />
+                </div>
+              )}
             </div>
             
             <div className="flex-1 p-6 overflow-y-auto bg-white">

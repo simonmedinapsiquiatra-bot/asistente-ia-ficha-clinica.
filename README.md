@@ -1,3 +1,5 @@
+TLZ AIUACA
+
 # Clinical Docs AI
 
 Clinical Docs AI es una aplicación web impulsada por Inteligencia Artificial diseñada específicamente para asistir a profesionales de la salud mental (como psiquiatras y psicólogos) en la generación de documentación clínica y evoluciones médicas.
