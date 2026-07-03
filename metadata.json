@@ -1,0 +1,6 @@
+{
+  "name": "Clinical Docs AI",
+  "description": "Generate psychiatric clinical documentation from Google Drive notes, transcripts, and manual inputs using Gemini AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

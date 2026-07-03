@@ -1,0 +1,43 @@
+Registro de Chat - Asistente de IA & Usuario
+Proyecto: Clinical Docs AI
+
+================================================================================
+PREGUNTA 1:
+la tengo que publicar para esto? (Refiriéndose a un problema de login de Google en la vista previa)
+
+RESPUESTA 1:
+No es necesario publicarla. El problema ocurre porque los navegadores bloquean las ventanas emergentes de inicio de sesión de Google dentro del marco incrustado (el iframe de vista previa) por motivos de seguridad. Se implementó un aviso y un flujo para intentar abrir en una pestaña separada.
+--------------------------------------------------------------------------------
+PREGUNTA 2:
+no existe ese boton (Indicando que la sugerencia anterior de "abrir en nueva pestaña" no era visible)
+
+RESPUESTA 2:
+Se ajustó la interfaz para mostrar explícitamente un botón grande azul dentro de la misma aplicación que dice "Abrir en nueva pestaña para ingresar" cuando se detecta que la app se está ejecutando dentro de un entorno restringido (iframe).
+--------------------------------------------------------------------------------
+PREGUNTA 3:
+podrias dejar el google auth como opcional, para poder ingresar a la aplicacion
+
+RESPUESTA 3:
+Se modificó la pantalla de inicio de sesión para incluir un "Modo Invitado" mediante un botón "Continuar sin iniciar sesión". De esta manera el Google Auth quedó como opcional para acceder a las herramientas principales.
+--------------------------------------------------------------------------------
+PREGUNTA 4:
+la unica parte que se puede escribir es en los apuntes de la sesion actual, la transcripcion se captura con español de chile (en una casilla pequeña solo para ver que se esta realizando, no para modificar), la ficha clinica que sea un boton para subir archivo o leer este desde google drive y la bibliografia la idea es que sea interna en un archivo de terminos no seleccionable e invisible para el usuario
+
+RESPUESTA 4:
+Se implementaron los siguientes cambios:
+1. "Ficha Clínica": Se transformó en un componente exclusivo para cargar archivos (locales .txt/.md o directamente desde Google Drive).
+2. "Transcripción de la Sesión": Se reemplazó el campo de texto por un componente de grabación de voz (Web Speech API) configurado en español de Chile ('es-CL') y de solo lectura.
+3. "Apuntes de la Sesión": Quedó como la única gran área de texto editable manualmente.
+4. "Bibliografía": Se eliminó de la vista del usuario y se implementó como una constante interna en el código (BIBLIOGRAFIA_INTERNA) con terminología psiquiátrica (eutímico, taquipsiquia, etc.) que se envía a la IA de forma invisible.
+--------------------------------------------------------------------------------
+PREGUNTA 5:
+¿que tipo de archivo podria servir para que una IA lo revise para poder comprender el tipo de lenguaje a utilizar en cada elemento solicitado? por ejemplo para poder ver como llena examen mental
+
+RESPUESTA 5:
+
+PREGUNTA 7:
+realiza un readme describiendo la aplicacion, genera un documento de texto con las preguntas y respuestas del chat asimismo
+
+RESPUESTA 7:
+(Se generan los archivos README.md y registro_chat.txt requeridos).
+================================================================================
