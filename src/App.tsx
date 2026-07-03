@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { User } from 'firebase/auth';
-import { initAuth, googleSignIn, logout } from './lib/auth';
 import { FileSection } from './components/FileSection';
 import { SpeechRecorder } from './components/SpeechRecorder';
 import { SettingsModal } from './components/SettingsModal';
 import { DEFAULT_SECTIONS, ClinicalSection, BIBLIOGRAFIA_INTERNA } from './prompts';
-import { Loader2, LogOut, FileText, Send, Sparkles, GripVertical, Check, Copy, Settings } from 'lucide-react';
+import { Loader2, FileText, Send, Sparkles, GripVertical, Check, Copy, Settings } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { GoogleGenAI } from "@google/genai";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loadingAuth, setLoadingAuth] = useState(true);
-  const [isGuest, setIsGuest] = useState(false);
-
   const [sections, setSections] = useState<ClinicalSection[]>(DEFAULT_SECTIONS);
   const [fichaClinica, setFichaClinica] = useState("");
   const [transcripcion, setTranscripcion] = useState("");
@@ -31,25 +26,17 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("gemini-2.5-pro");
+  const [driveClientId, setDriveClientId] = useState("");
 
   useEffect(() => {
     // Load settings from local storage
     const storedKey = localStorage.getItem("gemini_api_key");
     const storedModel = localStorage.getItem("gemini_model");
+    const storedClientId = localStorage.getItem("google_drive_client_id");
+    
     if (storedKey) setApiKey(storedKey);
     if (storedModel) setModel(storedModel);
-
-    const unsubscribe = initAuth(
-      (user) => {
-        setUser(user);
-        setLoadingAuth(false);
-      },
-      () => {
-        setUser(null);
-        setLoadingAuth(false);
-      }
-    );
-    return () => unsubscribe();
+    if (storedClientId) setDriveClientId(storedClientId);
   }, []);
 
   // Save settings when they change
@@ -61,15 +48,9 @@ export default function App() {
     localStorage.setItem("gemini_model", model);
   }, [model]);
 
-
-  const handleLogin = async () => {
-    try {
-      await googleSignIn();
-    } catch (err: any) {
-      console.error(err);
-      alert("Error al iniciar sesión con Google: " + (err.message || "Error desconocido") + "\n\nSi estás usando la vista previa, intenta abrir la aplicación en una nueva pestaña usando el ícono correspondiente.");
-    }
-  };
+  useEffect(() => {
+    localStorage.setItem("google_drive_client_id", driveClientId);
+  }, [driveClientId]);
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.setData('text/plain', index.toString());
@@ -166,73 +147,7 @@ export default function App() {
     }
   };
 
-  if (loadingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="animate-spin text-blue-600" size={32} />
-      </div>
-    );
-  }
-
-  if (!user && !isGuest) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center">
-          <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <FileText className="text-blue-600" size={32} />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">Clinical Docs AI</h1>
-          <p className="text-slate-500 mb-6">Inicia sesión con tu cuenta de Google para acceder a tus archivos de Drive y generar la documentación.</p>
-          
-          <div className="flex flex-col gap-3">
-            {window !== window.parent ? (
-              <div className="flex flex-col gap-4 mb-2">
-                <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg text-left">
-                  <strong>⚠️ Entorno restringido:</strong> Por seguridad, el inicio de sesión de Google no funciona dentro de esta vista previa incrustada.
-                </div>
-                <a 
-                  href={window.location.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-all font-medium"
-                >
-                  Abrir en nueva pestaña para ingresar
-                </a>
-              </div>
-            ) : (
-              <button 
-                onClick={handleLogin}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-slate-300 rounded-lg shadow-sm hover:bg-slate-50 transition-all font-medium text-slate-700"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#EA4335" d="M12.0003 9.50005C13.7703 9.50005 15.3553 10.1101 16.6053 11.3001L20.0303 7.87505C17.9553 5.94505 15.2353 4.75505 12.0003 4.75505C7.31028 4.75505 3.25528 7.44505 1.28027 11.3601L5.27027 14.4551C6.22527 11.5301 8.88028 9.50005 12.0003 9.50005Z"/>
-                  <path fill="#4285F4" d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"/>
-                  <path fill="#FBBC05" d="M5.26498 14.295C5.02498 13.57 4.88998 12.8 4.88998 12C4.88998 11.2 5.02498 10.43 5.26498 9.705L1.27498 6.61C0.459984 8.24 0 10.06 0 12C0 13.94 0.459984 15.76 1.27498 17.39L5.26498 14.295Z"/>
-                  <path fill="#34A853" d="M12 24C15.24 24 17.965 22.935 19.945 21.095L16.08 18.095C15.005 18.82 13.62 19.245 12 19.245C8.88 19.245 6.225 17.215 5.265 14.29L1.275 17.385C3.255 21.305 7.31 24 12 24Z"/>
-                </svg>
-                Sign in with Google
-              </button>
-            )}
-
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-slate-200"></div>
-              <span className="flex-shrink-0 mx-4 text-slate-400 text-sm">o</span>
-              <div className="flex-grow border-t border-slate-200"></div>
-            </div>
-
-            <button 
-              onClick={() => setIsGuest(true)}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all font-medium rounded-lg"
-            >
-              Continuar sin iniciar sesión
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
+  const appContent = (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <SettingsModal 
         isOpen={isSettingsOpen} 
@@ -241,6 +156,8 @@ export default function App() {
         setApiKey={setApiKey}
         model={model}
         setModel={setModel}
+        driveClientId={driveClientId}
+        setDriveClientId={setDriveClientId}
       />
 
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
@@ -254,23 +171,12 @@ export default function App() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="text-sm font-medium text-slate-600">{user?.email || "Modo Invitado"}</div>
           <button
             onClick={() => setIsSettingsOpen(true)}
             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-            title="Ajustes (API Key y Modelo)"
+            title="Ajustes (API Key, Modelo, Drive)"
           >
             <Settings size={18} />
-          </button>
-          <button 
-            onClick={() => {
-              if (user) logout();
-              setIsGuest(false);
-            }}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-            title="Salir"
-          >
-            <LogOut size={18} />
           </button>
         </div>
       </header>
@@ -314,7 +220,8 @@ export default function App() {
               label="Ficha Clínica" 
               value={fichaClinica} 
               onChange={setFichaClinica} 
-              isGuest={isGuest}
+              isGuest={false}
+              hasDriveConfigured={!!driveClientId}
             />
             <SpeechRecorder 
               value={transcripcion} 
@@ -411,4 +318,10 @@ export default function App() {
       </main>
     </div>
   );
+
+  return driveClientId ? (
+    <GoogleOAuthProvider clientId={driveClientId}>
+      {appContent}
+    </GoogleOAuthProvider>
+  ) : appContent;
 }

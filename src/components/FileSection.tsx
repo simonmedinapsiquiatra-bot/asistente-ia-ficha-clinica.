@@ -8,9 +8,10 @@ interface FileSectionProps {
   value: string;
   onChange: (val: string) => void;
   isGuest?: boolean;
+  hasDriveConfigured?: boolean;
 }
 
-export function FileSection({ label, value, onChange, isGuest }: FileSectionProps) {
+export function FileSection({ label, value, onChange, hasDriveConfigured }: FileSectionProps) {
   const [loadingFile, setLoadingFile] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +58,8 @@ export function FileSection({ label, value, onChange, isGuest }: FileSectionProp
     setLoadingFile(true);
     setSelectedFileName(file.name);
     try {
-      const accessToken = (window as any).gapi.client.getToken().access_token;
+      const { getAccessToken } = await import('../lib/auth');
+      const accessToken = await getAccessToken();
       
       let url = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`;
       
@@ -146,12 +148,22 @@ export function FileSection({ label, value, onChange, isGuest }: FileSectionProp
               }}
             />
 
-            {!isGuest && (
-              <div className="w-full hidden">
+            {hasDriveConfigured ? (
+              <div className="w-full">
                 <DriveFilePicker 
-                  label="O elegir documento de Google Drive"
+                  label="Elegir desde Google Drive"
                   onFileSelect={handleDriveFile} 
                 />
+              </div>
+            ) : (
+              <div className="w-full">
+                 <button
+                  type="button"
+                  disabled
+                  className="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-slate-200 bg-slate-50 rounded-lg text-sm font-medium text-slate-400 cursor-not-allowed"
+                >
+                  Configura tu Client ID en Ajustes para usar Drive
+                </button>
               </div>
             )}
           </div>

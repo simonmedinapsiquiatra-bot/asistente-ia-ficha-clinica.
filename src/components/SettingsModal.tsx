@@ -8,9 +8,11 @@ interface SettingsModalProps {
   setApiKey: (key: string) => void;
   model: string;
   setModel: (model: string) => void;
+  driveClientId: string;
+  setDriveClientId: (id: string) => void;
 }
 
-export function SettingsModal({ isOpen, onClose, apiKey, setApiKey, model, setModel }: SettingsModalProps) {
+export function SettingsModal({ isOpen, onClose, apiKey, setApiKey, model, setModel, driveClientId, setDriveClientId }: SettingsModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -46,6 +48,23 @@ export function SettingsModal({ isOpen, onClose, apiKey, setApiKey, model, setMo
             />
             <p className="text-xs text-slate-500">
               Tu clave se almacena de forma segura en tu navegador y no se envía a ningún servidor.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <Key size={16} className="text-slate-400" />
+              Google Drive Client ID <span className="text-xs font-normal text-slate-500">(Opcional)</span>
+            </label>
+            <input 
+              type="text"
+              placeholder="xxxxxxxxxxx.apps.googleusercontent.com"
+              value={driveClientId}
+              onChange={(e) => setDriveClientId(e.target.value)}
+              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 transition-all placeholder:text-slate-400"
+            />
+            <p className="text-xs text-slate-500">
+              Solo requerido si deseas importar archivos directamente desde Google Drive usando el botón de la interfaz.
             </p>
           </div>
 
