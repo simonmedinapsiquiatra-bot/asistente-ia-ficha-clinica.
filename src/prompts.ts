@@ -261,5 +261,5 @@ Este documento actúa como referencia interna de terminología, conceptos y abre
 - Sensopercepción: alucinaciones, ilusiones, pseudoalucinaciones.
 - Conciencia y orientación: vigil, lúcido, obnubilado, orientado témporo-espacialmente (OTE).
 - Insight: adecuado, parcial, nulo.
-\`;
+`;
 
